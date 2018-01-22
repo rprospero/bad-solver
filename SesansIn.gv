@@ -1,0 +1,9 @@
+digraph G {
+	DownstreamMagnetOnUpstreamMagnet -> MiddleMagnetOnUpstreamMagnet
+	MiddleMagnetOnUpstreamMagnet -> TankOut
+	TankOut -> AnalyzerIn;
+	AnalyzerIn -> DownStreamVcoilIn;
+	DownStreamVcoilIn -> DownStreamRedPipeIn;
+	DownStreamRedPipeIn -> DownStreamCoilsIn;
+	DownStreamCoilsIn -> Measure
+}
