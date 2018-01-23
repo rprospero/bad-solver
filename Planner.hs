@@ -3,6 +3,7 @@ import Control.Arrow (first, second, (&&&))
 import Control.Comonad (extract)
 import Control.Comonad.Cofree
 -- import Control.Lens
+import Control.Monad.Free
 import Control.Monad.State.Strict
 import Data.Foldable (minimumBy)
 import Data.Functor.Foldable
@@ -56,6 +57,19 @@ instance Show Problem where
 instance Recursive Problem where
   project = build
 
+instance Corecursive Problem where
+  embed (Branch p _) = p
+
+nextActions :: Problem -> [(Action, Problem)]
+nextActions p =
+  let
+    actions :: [Action]
+    actions = problemActions p
+    paths :: [Problem]
+    paths = map ((\x -> p {problemInit = x}) . (`actionCall` (problemInit p))) actions
+  in
+    filter ((`actionPre` (problemInit p)) . fst) . zip actions $ paths
+
 type instance Base Problem = Tree
 
 data Tree a = Branch Problem [(Action, a)]
@@ -93,6 +107,9 @@ build p
 --         annotate :: (CommandList, [(Action, Tree Problem)]) -> [(CommandList, Tree Problem)]
 --         annotate (cmds, ats) = map (first (:cmds)) ats
 --         newheads = filter ((`notElem` seen) . problemInit . snd) . map (second root) $ qs
+
+build2 :: Problem -> Tree Problem
+build2 p = Branch p $ nextActions p
 
 ----
 
@@ -170,7 +187,22 @@ move32' _ = False
 isDone :: Problem -> Bool
 isDone p = problemInit p == problemGoal p
 
+memohylo :: (Base Problem b -> b) -> (a -> Base Problem a) -> a -> b
+memohylo down up x = chrono down' up' $ ([], x)
+  where
+    -- up' :: a -> Base Problem (Free (Base Problem) a)
+    up' (seen, v) =
+      let
+        Branch p as = up v
+      in
+        if p `elem` seen
+        then Branch p []
+        else Branch p $ map (second (return . (\x -> (p:seen, x)))) as
+    -- down' :: (Base Problem) (Cofree (Base Problem) b) -> b
+    down' (Branch p as) = down (Branch p $ map (second extract) as)
+
+
 -- main = print . take 20 . bfs [] . build $ myProblem 0
 -- main = print . reverse . fst . head . dropWhile (not . isDone . snd) . bfs [] . build $ myProblem 4
 -- main = print . build $ myProblem 0
-main = print . head $ hylo collapse build $ myProblem 1
+main = print . head $ memohylo collapse build2 $ myProblem 2
