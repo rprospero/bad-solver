@@ -1,3 +1,6 @@
 /Planner.hi
 /Planner.o
 /Planner
+*.o
+*.hi
+/Main
