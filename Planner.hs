@@ -55,4 +55,4 @@ solve' xs = do
   return $ xs ++ promise
 
 solve :: (Eq w, Ord w) => Problem w -> CommandList w
-solve p = fst . head . filter (isDone . snd) . flip evalState (S.singleton p) $ solve' [([], p)]
+solve p = reverse . fst . head . filter (isDone . snd) . flip evalState (S.singleton p) $ solve' [([], p)]
