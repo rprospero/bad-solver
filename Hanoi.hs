@@ -11,8 +11,8 @@ myProblem discs spindles = Problem {
   problemGoal = reverse $ [0..discs] : replicate (spindles-1) [],
   problemActions = [
       move x y |
-      x <- [0.. spindles],
-      y <- [0..spindles],
+      x <- [0..spindles-1],
+      y <- [0..spindles-1],
       x /= y
                ]
   }
