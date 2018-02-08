@@ -8,7 +8,8 @@ type World = [[Int]]
 myProblem :: Int -> Int -> Problem World
 myProblem discs spindles = Problem {
   problemInit = [0..discs] : replicate (spindles-1) [],
-  problemGoal = reverse $ [0..discs] : replicate (spindles-1) [],
+  problemGoal = [\w -> n `elem` (w !! (spindles - 1))
+                | n <- [0..discs]],
   problemActions = [
       move x y |
       x <- [0..spindles-1],

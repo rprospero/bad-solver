@@ -10,7 +10,7 @@ data Action world = Action {
   }
 data Problem world = Problem {
   problemInit :: world,
-  problemGoal :: world,
+  problemGoal :: [world -> Bool],
   problemActions :: [Action world]
 }
 
@@ -35,13 +35,13 @@ nextActions p =
     actions = problemActions p
     paths = map ((\x -> p {problemInit = x}) . (`actionCall` (problemInit p))) actions
   in
-    filter ((`actionPre` (problemInit p)) . fst) . zip actions $ paths
+    filter ((`actionPre` problemInit p) . fst) . zip actions $ paths
 
 ----
 
 
 isDone :: Eq w => Problem w -> Bool
-isDone p = problemInit p == problemGoal p
+isDone p = and $ problemGoal p <*> pure (problemInit p)
 
 solve' :: Ord w => [(CommandList w, Problem w)] -> State (S.Set (Problem w)) [(CommandList w, Problem w)]
 solve' [] = return []
