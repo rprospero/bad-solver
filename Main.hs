@@ -5,4 +5,7 @@ import Hanoi (myProblem)
 import System.Environment (getArgs)
 
 main :: IO ()
-main = getArgs >>= print . length . solve . myProblem . read . head
+main = do
+  discs <- read . head<$> getArgs
+  spindles <- read . (!! 1) <$> getArgs 
+  print . solve $ myProblem discs spindles
